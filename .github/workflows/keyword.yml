@@ -1,0 +1,29 @@
+name: Assign Issues by Keywords
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+jobs:
+  assign_issues:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check Issue
+      id: assign
+      run: |
+        keywords=("bug" "feature" "enhancement") # Example Keywords
+        assignee="Subhankar1712" # Replace with the GitHub assign the issue
+
+        issue_title=$(jq -r .issue.title)
+        issue_body=$(jq -r .issue.body)
+        for keyword in "${keywords[@]}"; do
+          if [[ $issue_title == *"$keyword"* ]] || [[ $issue_body == *"$keyword"* ]]; then
+            echo "Assigning issue to $assignee"
+            gh issue assign $assignee
+            break
+          fi
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
